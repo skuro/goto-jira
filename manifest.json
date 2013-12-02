@@ -1,0 +1,24 @@
+{
+    "manifest_version": 2,
+
+    "name": "GOTO Jira",
+    "description": "Handy ways to navigate to your JIRA issues",
+    "version": "0.1",
+
+    "permissions": [
+        "tabs",
+        "<all_urls>"
+    ],
+
+    "browser_action": {
+        "default_icon": "logo.png",
+        "default_popup": "popup.html"
+    },
+
+    "content_scripts": [
+        {
+            "matches" : ["<all_urls>"],
+            "js" : ["getselection.js"]
+        }
+    ]
+}
