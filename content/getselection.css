@@ -1,0 +1,12 @@
+.GOTOJira_bubble {
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+li
+
+ul li {
+  content: url("img/logo.png");
+}
