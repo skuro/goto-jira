@@ -1,0 +1,10 @@
+body {
+  width: 300px;
+}
+
+div#form {
+  width: 100%;
+  background-image: url("logo.png");
+  background-repeat: no-repeat;
+  background-position: 100% 0%;
+}
