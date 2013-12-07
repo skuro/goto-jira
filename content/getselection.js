@@ -4,27 +4,29 @@
  * Respond on queries to provide the selected text on the page
  */
 
-function getSelection(){
+function noIssuesFoundResponse(){
+    return {
+        found: false,
+        text: "no issues found"
+    };
+}
+
+function findIssueNumber(){
     var selection = window.getSelection();
-    if(selection != null && selection != undefined) {
+    if(selection != null && selection != undefined && selection.toString() !== "") {
         return {
-            selected: true,
+            found: true,
             text: selection.toString()
         };
     }
 
-    return {
-        selected: false
-    };
+    return noIssuesFoundResponse();
 }
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.method == "getSelection") {
-            var selection = {text: "foobar"};
+            var selection = findIssueNumber();
             sendResponse(selection);
-        }
-        else{
-            sendResponse({text: "nothing"}); // snub them.
         }
     });
