@@ -6,10 +6,13 @@
   background: #fff;
   border-radius: 3px;
   border: solid 1px #ddd;
+  padding: 0px 20px 0px 0px;
+  z-index: 100;
 }
 
-li
-
-ul li {
-  content: url("img/logo.png");
+ul#goto-jira-list li {
+  padding-left: 22px;
+  background: url('chrome-extension://__MSG_@@extension_id__/img/logo-small.png') left center no-repeat;
+  line-height: 22px;
+  list-style: none;
 }

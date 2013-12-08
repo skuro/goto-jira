@@ -1,71 +1,85 @@
 /**
  * GOTOJira content script
  *
- * Respond on queries to provide the selected text on the page
+ * Creates a tooltip with links to the JIRA issues mentioned in the currently
+ * selected text.
+ *
+ * @author Carlo Sciolla
  */
 
-var tooltipTemplate = "<ul>{{#issues}}<li><a goto-jira=\"link\" href=\"{{link}}\">{{key}}</a></li>{{/issues}}</ul>";
+var GOTOJira = function() {
 
-function parseIssues(text){
-    return text.match(/[a-zA-Z]+-[0-9]+/g) || [];
-}
+    // save ref for cross fn call
+    var self = this;
 
-var bubble = document.createElement("div");
-bubble.setAttribute('id', 'GOTOJira_bubble');
-bubble.setAttribute('class', 'GOTOJira_bubble');
-document.body.appendChild(bubble);
+    this.tooltipTemplate = "<ul id=\"goto-jira-list\">{{#issues}}<li><a goto-jira=\"link\" href=\"{{link}}\">{{key}}</a></li>{{/issues}}</ul>";
 
-function isIssueClick(event){
-    var target = event.target;
-    var attrib = target.getAttribute("goto-jira");
-    return attrib != null && "link" == attrib;
-}
+    this.bubble = (function() {
+        var elem = document.createElement("div");
+        elem.setAttribute('id', 'GOTOJira_bubble');
+        elem.setAttribute('class', 'GOTOJira_bubble');
+        document.body.appendChild(elem);
 
-// Lets listen to mouseup DOM events.
-document.addEventListener('mouseup', function (e) {
-    if(!isIssueClick(e)) {
-        var selection = window.getSelection().toString();
-        if (selection.length > 0) {
-            var issues = parseIssues(selection);
-            if(issues.length > 0) {
-                renderBubble(e.clientX, e.clientY, issues);
+        return elem;
+    })();
+
+    this.parseIssues = function (text) {
+        return text.match(/[a-zA-Z]+-[0-9]+/g) || [];
+    };
+
+    this.isIssueClick = function (event){
+        var target = event.target;
+        var attrib = target.getAttribute("goto-jira");
+        return attrib != null && "link" == attrib;
+    };
+
+    this.renderBubbleContent = function (model) {
+        var tooltipTemplate = self.tooltipTemplate;
+        var output = Mustache.render(tooltipTemplate, model);
+        return output;
+    };
+
+    // Move that bubble to the appropriate location.
+    this.renderBubble = function (mouseX, mouseY, issues) {
+        var issuesLinks = [];
+        var bubble = self.bubble;
+
+        issues.forEach(function(issue) {
+            issuesLinks.push({
+                link : "https://backbase.atlassian.net/browse/" + issue,
+                key  : issue
+            });
+        });
+
+        bubble.innerHTML = self.renderBubbleContent({issues : issuesLinks});
+        bubble.style.top = mouseY + 'px';
+        bubble.style.left = mouseX + 'px';
+        bubble.style.visibility = 'visible';
+    }
+
+    // Lets listen to mouseup DOM events.
+    document.addEventListener('mouseup', function (e) {
+        if(!self.isIssueClick(e)) {
+            var selection = window.getSelection().toString();
+            if (selection.length > 0) {
+                var issues = self.parseIssues(selection);
+                if(issues.length > 0) {
+                    self.renderBubble(e.clientX, e.clientY, issues);
+                }
             }
         }
-    }
-}, false);
+    }, false);
 
-// Close the bubble when we click on the screen.
-document.addEventListener('mousedown', function (e) {
-    if(!isIssueClick(e)) {
-        bubble.innerHTML = "";
-        bubble.style.visibility = 'hidden';
-    }
-}, false);
+    // Close the bubble when we click on the screen.
+    document.addEventListener('mousedown', function (e) {
+        var bubble = self.bubble;
 
-function renderBubbleContent(model) {
-    var output = Mustache.render(tooltipTemplate, model);
-    return output;
-}
+        if(!self.isIssueClick(e) && bubble.style.visibility == "visible") {
+            bubble.innerHTML = "";
+            bubble.style.visibility = 'hidden';
+            return false;
+        }
+    }, false)
+};
 
-// Move that bubble to the appropriate location.
-function renderBubble(mouseX, mouseY, issues) {
-    var issuesLinks = [];
-    issues.forEach(function(issue) {
-        issuesLinks.push({
-            link : "https://backbase.atlassian.net/browse/" + issue,
-            key  : issue
-        });
-    });
-
-    bubble.innerHTML = renderBubbleContent({issues : issuesLinks});
-    bubble.style.top = mouseY + 'px';
-    bubble.style.left = mouseX + 'px';
-    bubble.style.visibility = 'visible';
-}
-
-function noIssuesFoundResponse(){
-    return {
-        found: false,
-        text: "no issues found"
-    };
-}
+var gotoJira = new GOTOJira();

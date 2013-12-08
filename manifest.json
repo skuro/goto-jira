@@ -10,6 +10,10 @@
         "<all_urls>"
     ],
 
+    "web_accessible_resources": [
+        "img/logo-small.png"
+    ],
+
     "content_scripts": [
         {
             "matches" : ["<all_urls>"],
