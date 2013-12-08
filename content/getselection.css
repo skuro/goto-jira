@@ -3,6 +3,9 @@
   position: absolute;
   top: 0;
   left: 0;
+  background: #fff;
+  border-radius: 3px;
+  border: solid 1px #ddd;
 }
 
 li
